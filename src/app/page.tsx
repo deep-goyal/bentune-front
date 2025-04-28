@@ -18,11 +18,22 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('https://bentune-backend.onrender.com/query', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: input }),
-      });
+      // Poll until we get a non-204 response
+      let response: Response;
+      while (true) {
+        response = await fetch('https://bentune-backend.onrender.com/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: input }),
+        });
+        if (response.status === 204) {
+          setMessages(prev => [...prev, { role: 'bot', text: 'Thinking...' }]);
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+        break;
+      }
 
       // Check for HTTP errors
       if (!response.ok) {
@@ -34,12 +45,6 @@ export default function ChatPage() {
           // ignore JSON parse errors
         }
         throw new Error(errorText);
-      }
-
-      // Handle 204 No Content as thinking
-      if (response.status === 204) {
-        setMessages(prev => [...prev, { role: 'bot', text: 'Thinking...' }]);
-        return;
       }
 
       const data = await response.json();
