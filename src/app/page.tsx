@@ -24,22 +24,29 @@ export default function ChatPage() {
         body: JSON.stringify({ question: input }),
       });
 
-      const data = await response.json();
-
+      // Check for HTTP errors
       if (!response.ok) {
-        throw new Error(data.error || 'API Error');
+        let errorText = response.statusText;
+        try {
+          const errData = await response.json();
+          if (errData.error) errorText = errData.error;
+        } catch {
+          // ignore JSON parse errors
+        }
+        throw new Error(errorText);
       }
 
-      await new Promise(resolve => setTimeout(resolve, 100000)); // small wait for server lag
+      const data = await response.json();
+      const answer = data.answer ?? 'No response from model.';
 
-      const botMessage: { role: 'bot'; text: string } = {
-        role: 'bot',
-        text: data.answer ?? 'No response from model.',
-      };
-
-      setMessages(prev => [...prev, botMessage]);
+      setMessages(prev => [...prev, { role: 'bot', text: answer }]);
     } catch (error: any) {
-      setMessages(prev => [...prev, { role: 'bot', text: 'Error: ' + error.message }]);
+      // Handle fetch/network errors gracefully
+      let errorMsg = (error as Error).message;
+      if (errorMsg.toLowerCase().includes('failed to fetch')) {
+        errorMsg = 'Network error: Unable to reach the backend. Please try again.';
+      }
+      setMessages(prev => [...prev, { role: 'bot', text: errorMsg }]);
     } finally {
       setLoading(false);
     }
