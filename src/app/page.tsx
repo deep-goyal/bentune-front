@@ -30,7 +30,7 @@ export default function ChatPage() {
         throw new Error(data.error || 'API Error');
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000)); // small wait for server lag
+      await new Promise(resolve => setTimeout(resolve, 100000)); // small wait for server lag
 
       const botMessage: { role: 'bot'; text: string } = {
         role: 'bot',
