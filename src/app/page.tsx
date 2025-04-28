@@ -30,21 +30,19 @@ export default function ChatPage() {
         throw new Error(data.error || 'API Error');
       }
 
-      // Explicitly type the bot message
+      await new Promise(resolve => setTimeout(resolve, 1000)); // small wait for server lag
+
       const botMessage: { role: 'bot'; text: string } = {
         role: 'bot',
         text: data.answer ?? 'No response from model.',
       };
 
-      setMessages([...updatedMessages, botMessage]);
+      setMessages(prev => [...prev, botMessage]);
     } catch (error: any) {
-      setMessages([
-        ...updatedMessages,
-        { role: 'bot', text: 'Error: ' + error.message },
-      ]);
+      setMessages(prev => [...prev, { role: 'bot', text: 'Error: ' + error.message }]);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -98,6 +96,3 @@ export default function ChatPage() {
     </div>
   );
 }
-
-
-
