@@ -36,6 +36,12 @@ export default function ChatPage() {
         throw new Error(errorText);
       }
 
+      // Handle 204 No Content as thinking
+      if (response.status === 204) {
+        setMessages(prev => [...prev, { role: 'bot', text: 'Thinking...' }]);
+        return;
+      }
+
       const data = await response.json();
       const answer = data.answer ?? 'No response from model.';
 
