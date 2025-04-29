@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { FaPaperPlane } from 'react-icons/fa';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<{ role: 'user' | 'bot'; text: string }[]>([]);
@@ -11,14 +12,12 @@ export default function ChatPage() {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMessage: { role: 'user'; text: string } = { role: 'user', text: input };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+    const userMessage = { role: 'user' as const, text: input };
+    setMessages(prev => [...prev, userMessage]);
     setInput('');
     setLoading(true);
 
     try {
-      // Poll until we get a non-204 response
       let response: Response;
       while (true) {
         response = await fetch('https://bentune-backend.onrender.com/query', {
@@ -28,31 +27,25 @@ export default function ChatPage() {
         });
         if (response.status === 204) {
           setMessages(prev => [...prev, { role: 'bot', text: 'Thinking...' }]);
-          // Wait before retrying
           await new Promise(resolve => setTimeout(resolve, 1000));
           continue;
         }
         break;
       }
 
-      // Check for HTTP errors
       if (!response.ok) {
         let errorText = response.statusText;
         try {
           const errData = await response.json();
           if (errData.error) errorText = errData.error;
-        } catch {
-          // ignore JSON parse errors
-        }
+        } catch {}
         throw new Error(errorText);
       }
 
       const data = await response.json();
       const answer = data.answer ?? 'No response from model.';
-
       setMessages(prev => [...prev, { role: 'bot', text: answer }]);
     } catch (error: any) {
-      // Handle fetch/network errors gracefully
       let errorMsg = (error as Error).message;
       if (errorMsg.toLowerCase().includes('failed to fetch')) {
         errorMsg = 'Network error: Unable to reach the backend. Please try again.';
@@ -71,14 +64,12 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-black">
-      {/* Header with logo */}
-      <header className="flex items-center p-4 border-b bg-black shadow-md">
-        <Image src="/logo.png" alt="Logo" width={200} height={200} className="mr-3 sm:w-1/2 md:w-1/3" />
+    <div className="flex flex-col h-screen">
+      <header className="flex items-center p-4 shadow-md">
+        <Image src="/logo.png" alt="Logo" width={200} height={200} />
       </header>
 
-      {/* Message Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4 sm:space-y-2">
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
@@ -93,22 +84,21 @@ export default function ChatPage() {
         {loading && <div className="text-sm text-gray-500">Thinking...</div>}
       </div>
 
-      {/* Input Box */}
-      <div className="p-4 border-t bg-black sm:px-2 md:px-4">
+      <div className="flex items-center p-4 sm:px-2 md:px-4">
         <textarea
           rows={1}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type your message..."
-          className="w-full p-3 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 sm:text-sm md:text-base"
+          className="flex-1 p-3 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 mr-2"
         />
         <button
           onClick={sendMessage}
-          className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded float-right sm:w-full md:w-auto"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded flex items-center"
           disabled={loading}
         >
-          Send
+          <FaPaperPlane className="h-5 w-5" />
         </button>
       </div>
     </div>

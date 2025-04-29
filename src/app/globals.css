@@ -15,12 +15,12 @@
 
 
 .dark {
-  --background: #111827;         
-  --foreground: #f9fafb;        
-  --muted-foreground: #9ca3af;   
-  --border: #374151;             
-  --card-background: #1f2937;    
-  --input-background: #1f2937;   
+  --background: #000000;
+  --foreground: #f9fafb;
+  --muted-foreground: #9ca3af;
+  --border: #000000;
+  --card-background: #000000;
+  --input-background: #1f2937;
 }
 
 body {
@@ -41,4 +41,3 @@ textarea::placeholder {
 
 
 
- 

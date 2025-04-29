@@ -29,10 +29,10 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-full bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300`}>
         <Providers>
           <main className="min-h-screen flex items-center justify-center">
-            <div className="w-full max-w-3xl bg-[var(--card-background)] border border-[var(--border)] rounded-xl shadow-xl overflow-hidden relative transition-colors duration-300">
+            <div className="w-full max-w-7xl bg-[var(--card-background)] border border-[var(--border)] rounded-xl shadow-xl overflow-hidden relative transition-colors duration-300">
               
               {/* Theme Switcher */}
-              <div className="absolute top-4 right-4 z-10">
+              <div className="absolute top-15 right-4 z-10 text-xl">
                 <ThemeSwitch />
               </div>
   
